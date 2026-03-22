@@ -43,34 +43,78 @@ def search_yandex_archive(query: str, index: str = "archive", max_pages: int = 1
             # Use StealthyFetcher to bypass Yandex bot protection
             page = StealthyFetcher.fetch(url, headless=True, network_idle=True)
             
-            # Find all links that look like archive documents
-            links = page.css('a')
+            # Try to extract data from Next.js JSON state
+            next_data = page.css('#__NEXT_DATA__::text').get()
             page_results = []
             
-            for link in links:
-                href = link.attrib.get('href', '')
-                text = link.css('::text').get()
-                
-                # Check if it's a document link
-                if ('/archive/catalog/' in href or '/archive/periodicals/' in href or '/archive/directories/' in href) and text:
-                    # Try to extract the snippet from the URL if it's there
-                    snippet = ""
-                    parsed_url = urllib.parse.urlparse(href)
-                    query_params = urllib.parse.parse_qs(parsed_url.query)
-                    if 'snippet' in query_params:
-                        snippet = query_params['snippet'][0]
+            if next_data:
+                data = json.loads(next_data)
+                try:
+                    items = data.get('props', {}).get('pageProps', {}).get('items', [])
                     
-                    # Clean up text and snippet
-                    text = text.strip()
-                    snippet = snippet.replace('\x07', '').replace('[', '').replace(']', '').strip()
-                    
-                    # Avoid duplicates (sometimes Yandex has multiple links to the same doc)
-                    if not any(r['url'] == href for r in page_results):
+                    for item in items:
+                        # Extract metadata
+                        doc_id = item.get('parentId')
+                        page_id = item.get('sheetPageNumber')
+                        title = item.get('namepath', 'Неизвестный документ')
+                        snippet = item.get('snippet', '').replace('\x07', '').replace('[', '').replace(']', '').strip()
+                        
+                        # Extract dates
+                        date_from = item.get('dateFrom', '')
+                        date_to = item.get('dateTo', '')
+                        date_str = ""
+                        if date_from and date_to:
+                            date_str = f" ({date_from} — {date_to})"
+                        elif date_from:
+                            date_str = f" ({date_from})"
+                            
+                        # Extract image URLs
+                        thumb_url = ""
+                        if item.get('thumb') and item['thumb'].get('path'):
+                            thumb_url = f"https://yandex.ru{item['thumb']['path']}"
+                            
+                        original_image_url = ""
+                        if item.get('originalImagePath'):
+                            original_image_url = f"https://yandex.ru{item['originalImagePath']}"
+                            
+                        # Construct direct link to the viewer
+                        viewer_url = f"https://yandex.ru/archive/catalog/{doc_id}/{page_id}"
+                        
                         page_results.append({
-                            "title": text,
-                            "url": f"https://yandex.ru{href}" if href.startswith('/') else href,
-                            "snippet": snippet
+                            "title": f"{title}{date_str}",
+                            "url": viewer_url,
+                            "snippet": snippet,
+                            "thumb_url": thumb_url,
+                            "original_image_url": original_image_url
                         })
+                except Exception as e:
+                    print(f"⚠️ Ошибка парсинга JSON: {e}")
+            
+            # Fallback to HTML parsing if JSON fails
+            if not page_results:
+                links = page.css('a')
+                for link in links:
+                    href = link.attrib.get('href', '')
+                    text = link.css('::text').get()
+                    
+                    if ('/archive/catalog/' in href or '/archive/periodicals/' in href or '/archive/directories/' in href) and text:
+                        snippet = ""
+                        parsed_url = urllib.parse.urlparse(href)
+                        query_params = urllib.parse.parse_qs(parsed_url.query)
+                        if 'snippet' in query_params:
+                            snippet = query_params['snippet'][0]
+                        
+                        text = text.strip()
+                        snippet = snippet.replace('\x07', '').replace('[', '').replace(']', '').strip()
+                        
+                        if not any(r['url'] == href for r in page_results):
+                            page_results.append({
+                                "title": text,
+                                "url": f"https://yandex.ru{href}" if href.startswith('/') else href,
+                                "snippet": snippet,
+                                "thumb_url": "",
+                                "original_image_url": ""
+                            })
             
             if not page_results:
                 print("⚠️ На этой странице не найдено результатов. Возможно, мы достигли конца или сработала защита.")
@@ -79,7 +123,6 @@ def search_yandex_archive(query: str, index: str = "archive", max_pages: int = 1
             all_results.extend(page_results)
             print(f"✅ Найдено {len(page_results)} документов на странице {page_num + 1}.")
             
-            # Be polite to the server
             if page_num < max_pages - 1:
                 time.sleep(2)
                 
@@ -90,7 +133,6 @@ def search_yandex_archive(query: str, index: str = "archive", max_pages: int = 1
     return all_results
 
 if __name__ == "__main__":
-    # Simple CLI for testing
     query = sys.argv[1] if len(sys.argv) > 1 else "Александр Пушкин"
     index = sys.argv[2] if len(sys.argv) > 2 else "archive"
     pages = int(sys.argv[3]) if len(sys.argv) > 3 else 1
@@ -106,6 +148,8 @@ if __name__ == "__main__":
         if res['snippet']:
             print(f"    Фрагмент: {res['snippet']}")
         print(f"    Ссылка: {res['url']}")
+        if res['original_image_url']:
+            print(f"    Скан (Оригинал): {res['original_image_url']}")
         
     if len(results) > 20:
         print(f"\n... и еще {len(results) - 20} результатов.")
