@@ -1,3 +1,8 @@
+---
+name: yandex-archive-scraper
+description: Search and extract data from Yandex.Archive (Яндекс.Архив) — metric books, newspapers, directories. Bypasses bot protection via Scrapling.
+---
+
 # yandex-archive-scraper
 
 A powerful skill for searching and extracting data from Yandex.Archive (Яндекс.Архив) using `Scrapling` to bypass bot protection and Cloudflare Turnstile.
