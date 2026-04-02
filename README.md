@@ -1,10 +1,23 @@
 # yandex-archive-scraper
 
-A powerful skill for searching and extracting data from Yandex.Archive (Яндекс.Архив) using `Scrapling` to bypass bot protection and Cloudflare Turnstile.
+A skill for searching and extracting data from **Yandex.Archive** (Яндекс.Архив) — a free online service by Yandex that provides digitized historical documents from Russian archives, libraries, and museums.
+
+## What is Yandex.Archive?
+
+Yandex.Archive (https://yandex.ru/archive) is a searchable database of millions of digitized pages from Russian historical sources. It includes:
+
+- **Metric books** (метрические книги) — birth, marriage, and death records from church registries (18th–20th centuries).
+- **Revision tales** (ревизские сказки) — population census records from the Imperial era.
+- **Confessional statements** (исповедные ведомости) — parishioner lists maintained by the Orthodox Church.
+- **Old newspapers** (периодика) — digitized issues of pre-revolutionary and Soviet-era newspapers.
+- **Address calendars & directories** (справочники) — official reference books listing residents, officials, and organizations by city and governorate.
+
+This is an invaluable resource for genealogy, historical research, and local history studies.
 
 ## Features
+
 - Converts natural language queries into optimized Yandex.Archive search URLs.
-- Uses `Scrapling` (StealthyFetcher) to bypass Yandex bot protection.
+- Uses `Scrapling` (StealthyFetcher) to bypass Yandex bot protection and Cloudflare Turnstile.
 - Extracts search results (document titles, text snippets, and direct links).
 - Supports pagination to collect multiple pages of results.
 - Can search across all three Yandex.Archive indexes:
@@ -45,16 +58,29 @@ Or use it as an agent tool:
 
 # yandex-archive-scraper (Русский)
 
-Мощный скилл для поиска и извлечения данных из Яндекс.Архива с использованием фреймворка `Scrapling` для обхода защиты от ботов и Cloudflare Turnstile.
+Скилл для поиска и извлечения данных из сервиса **Яндекс.Архив** с использованием фреймворка `Scrapling` для обхода защиты от ботов и Cloudflare Turnstile.
+
+## Что такое Яндекс.Архив
+
+Яндекс.Архив (https://yandex.ru/archive) — бесплатный сервис Яндекса с миллионами оцифрованных страниц исторических документов из российских архивов, библиотек и музеев. Включает:
+
+- **Метрические книги** — записи о рождении, браке и смерти из церковных реестров (XVIII–XX века).
+- **Ревизские сказки** — переписи населения имперского периода.
+- **Исповедные ведомости** — списки прихожан православных церквей.
+- **Периодика** — оцифрованные номера дореволюционных и советских газет.
+- **Справочники** — адрес-календари, памятные книжки, списки жителей и должностных лиц по городам и губерниям.
+
+Незаменимый ресурс для генеалогических исследований, исторических изысканий и краеведения.
 
 ## Возможности
-- Преобразует запросы на естественном языке в оптимизированные URL для поиска по Яндекс.Архиву.
+
+- Преобразует запросы на естественном языке в оптимизированные поисковые URL для сервиса Яндекс.Архив.
 - Использует `Scrapling` (StealthyFetcher) для обхода защиты Яндекса.
 - Извлекает результаты поиска (названия документов, текстовые фрагменты/сниппеты и прямые ссылки).
 - Поддерживает пагинацию для сбора нескольких страниц результатов.
-- Умеет искать по всем трем базам Яндекс.Архива:
+- Поиск по всем трём разделам сервиса:
   - `archive` (Архивы) — Метрические книги, ревизские сказки, исповедные ведомости.
-  - `mass_media` (Периодика) — Старые газеты (например, "Сенатские ведомости", "Губернские ведомости").
+  - `mass_media` (Периодика) — Старые газеты (например, «Сенатские ведомости», «Губернские ведомости»).
   - `directories` (Справочники) — Адрес-календари, списки жителей, памятные книжки.
 
 ## Установка
